@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EEE Results Dashboard – Apr/May 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f5f6f2; --panel:#ffffff; --ink:#16233a; --muted:#5c6779; --line:#dde1d8;
+  --pass:#1d7a4e; --pass-bg:#dcf0e4; --u:#b4421f; --u-bg:#fbe3d9; --ua:#5b4b9a; --ua-bg:#e8e3f6;
+  --accent:#16233a; --chip:#eef0ea;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1622; --panel:#172131; --ink:#e7ecf4; --muted:#93a0b5; --line:#263349;
+    --pass:#5fd39b; --pass-bg:#173a2b; --u:#ff9a7a; --u-bg:#40241b; --ua:#b9a9ff; --ua-bg:#2c2650;
+    --accent:#e7ecf4; --chip:#1e2a3d;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1622; --panel:#172131; --ink:#e7ecf4; --muted:#93a0b5; --line:#263349;
+  --pass:#5fd39b; --pass-bg:#173a2b; --u:#ff9a7a; --u-bg:#40241b; --ua:#b9a9ff; --ua-bg:#2c2650;
+  --accent:#e7ecf4; --chip:#1e2a3d;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans)}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+h1{font:600 clamp(24px,4vw,34px)/1.15 var(--serif);margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 18px;max-width:70ch}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+button{font:inherit;color:inherit;cursor:pointer}
+.theme{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 10px}
+:focus-visible{outline:2px solid var(--ua);outline-offset:2px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.tab{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 14px;font-weight:500}
+.tab small{color:var(--muted);font-weight:400;margin-left:6px}
+.tab[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.tab[aria-pressed="true"] small{color:inherit;opacity:.75}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.controls input,.controls select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:150px}
+.controls input{flex:1 1 220px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kpi b{display:block;font:600 26px/1.1 var(--serif)}
+.kpi span{color:var(--muted);font-size:12.5px}
+.kpi.p b{color:var(--pass)} .kpi.u b{color:var(--u)} .kpi.a b{color:var(--ua)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card h2{font:600 17px/1.2 var(--serif);margin:0 0 10px}
+.bar-row{display:grid;grid-template-columns:48px 1fr 44px;gap:8px;align-items:center;margin:5px 0}
+.bar-row .track{height:14px;background:var(--chip);border-radius:4px;overflow:hidden;display:flex}
+.bar-row .track i{display:block;height:100%}
+.bar-row em{font-style:normal;color:var(--muted);text-align:right;font-size:12.5px}
+.f-pass{background:var(--pass)} .f-u{background:var(--u)} .f-ua{background:var(--ua)} .f-g{background:#4a7fb5}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:12.5px;margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:900px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;font-size:12.5px;color:var(--muted);background:var(--panel);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td.reg{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted)}
+td.nm{font-weight:500;min-width:160px}
+.chips{display:flex;flex-wrap:wrap;gap:3px}
+.c{display:inline-block;min-width:26px;text-align:center;padding:1px 5px;border-radius:5px;font-size:12px;font-weight:600;background:var(--chip)}
+.c.ok{background:var(--pass-bg);color:var(--pass)} .c.U{background:var(--u-bg);color:var(--u)} .c.UA{background:var(--ua-bg);color:var(--ua)}
+.dash{color:var(--muted)}
+.summary{display:flex;gap:6px;white-space:nowrap}
+.count{color:var(--muted);margin:0 0 8px}
+.note{color:var(--muted);font-size:12.5px;margin-top:18px;max-width:80ch}
+.batchbtn{all:unset;cursor:pointer;display:block;width:100%}
+.batchbtn:focus-visible{outline:2px solid var(--ua)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <div>
+      <h1>EEE Results Dashboard</h1>
+      <p class="sub">Provisional results, April / May 2026 · Mangayarkarasi College of Engineering (9238) · B.E. Electrical and Electronics Engineering. Students are grouped by joining year, read from digits 5–6 of the register number.</p>
+    </div>
+    <button class="theme" id="theme" aria-label="Toggle light or dark theme">Theme</button>
+  </div>
+
+  <div class="tabs" id="tabs" role="group" aria-label="Batch"></div>
+
+  <div class="controls">
+    <input id="q" type="search" placeholder="Search name or register number" aria-label="Search students">
+    <select id="sem" aria-label="Semester"></select>
+    <select id="status" aria-label="Status">
+      <option value="all">All students</option>
+      <option value="arrear">With U / UA grades</option>
+      <option value="clear">No U / UA grades</option>
+    </select>
+  </div>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="grid">
+    <div class="card"><h2>Grade distribution</h2><div id="gradeBars"></div></div>
+    <div class="card"><h2>Result by semester</h2><div id="semBars"></div>
+      <div class="legend"><span><i class="f-pass"></i>Pass</span><span><i class="f-u"></i>U (fail)</span><span><i class="f-ua"></i>UA (absent)</span></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-bottom:16px">
+    <h2>Batch comparison</h2>
+    <div id="batchBars"></div>
+  </section>
+
+  <p class="count" id="count"></p>
+  <div class="scroll"><table id="tbl"></table></div>
+
+  <p class="note">How to read this: the university list shows only the grades that were published for each student, so the pass rate here is the share of listed grades that are passing, not of every paper a student wrote. A student with a dash has a row on that page but no grade printed. Subject-wise grades can't be matched to subject codes because the PDF text loses the column positions. Grades O, A+, A, B+, B, C are passes. U is fail, UA is absent.</p>
+</main>
+
+<script>
+const RAW = {
+1:`923821105002|ABDHULRAHUMAN R|UA UA
+923821105024|MADHESHWARAN P|
+923821105057|VISHVA T|UA UA UA UA
+923822105004|ARUN PANDI A|U U U
+923822105005|BALAPRASANNA S|UA UA UA UA UA
+923822105010|DEEPA SRI R|U
+923822105013|DIVYA P|UA UA UA UA
+923822105016|HARINI PRIYA M|U
+923822105019|KADHIJA S|UA UA
+923822105029|NAVEENSAMY B|UA UA
+923822105032|POOJA K|UA
+923822105033|RAJA SOORIYA S|UA
+923822105040|RONEY JOSHUA WESLEY J|U
+923822105041|ROONY JOEL KINGSLEY J|U
+923822105043|SAKTHIVEL C|U U UA UA UA
+923822105044|SANJANA M|UA UA UA UA
+923822105051|SURYA G|UA UA UA
+923822105058|YOGESHWAR G K|B U U
+923822105059|YUVARAJ M|U U U
+923823105004|AKSHAYA S|U U U
+923823105006|ARUL KARUPPANASAMY M|U U
+923823105008|AVINASH|U U UA U
+923823105009|BHARATHKUMAR V|U U U U
+923823105012|DHANALAKSHMI S|U
+923823105013|DINESH KUMAR N|UA B U
+923823105030|MOHAN M|UA UA UA UA UA
+923823105032|MURUGADAS V|UA UA
+923823105035|NITHISH KUMAR M|UA U UA
+923823105048|SARAVANAPERUMAL M|UA U
+923823105052|SUBAASH P M|U
+923823105054|SUDHIN S|U B U`,
+2:`923821105002|ABDHULRAHUMAN R|UA UA
+923821105024|MADHESHWARAN P|
+923821105057|VISHVA T|UA UA UA UA UA
+923822105004|ARUN PANDI A|U UA B UA U
+923822105005|BALAPRASANNA S|UA UA UA UA UA UA
+923822105013|DIVYA P|UA UA UA UA UA UA
+923822105016|HARINI PRIYA M|UA
+923822105019|KADHIJA S|UA UA
+923822105032|POOJA K|UA
+923822105033|RAJA SOORIYA S|U B UA
+923822105041|ROONY JOEL KINGSLEY J|B+
+923822105043|SAKTHIVEL C|UA UA UA UA U UA
+923822105044|SANJANA M|UA UA UA UA UA
+923822105051|SURYA G|UA UA UA UA
+923822105058|YOGESHWAR G K|U U U UA U
+923822105059|YUVARAJ M|U U U B U U
+923823105004|AKSHAYA S|UA UA UA B+ UA
+923823105006|ARUL KARUPPANASAMY M|UA U U
+923823105008|AVINASH|U UA UA B+ B UA UA
+923823105009|BHARATHKUMAR V|U UA U UA UA
+923823105013|DINESH KUMAR N|UA UA U UA UA
+923823105027|MANJUSREE A|B+ U
+923823105030|MOHAN M|UA UA UA
+923823105032|MURUGADAS V|U
+923823105035|NITHISH KUMAR M|UA UA UA UA UA
+923823105036|NITHIYASREE S|U
+923823105048|SARAVANAPERUMAL M|UA UA U UA UA
+923823105051|SRIYASHINI N|U
+923823105052|SUBAASH P M|U U
+923823105054|SUDHIN S|UA U UA UA`,
+3:`923821105002|ABDHULRAHUMAN R|UA UA UA UA UA UA
+923821105003|ABDUL KHADHIR JEELANI B|U
+923821105012|GOPINATH P|
+923821105021|KARTHIKEYAN R|U
+923821105024|MADHESHWARAN P|
+923821105026|MARI SELVAN K|U
+923821105057|VISHVA T|UA UA UA UA
+923822105002|AKASHRAJ M|B+
+923822105004|ARUN PANDI A|B UA U U
+923822105005|BALAPRASANNA S|UA UA UA UA UA UA
+923822105013|DIVYA P|UA UA UA UA UA
+923822105016|HARINI PRIYA M|UA
+923822105019|KADHIJA S|UA UA UA UA UA UA
+923822105029|NAVEENSAMY B|UA UA UA UA
+923822105032|POOJA K|UA U UA UA
+923822105033|RAJA SOORIYA S|U U B U U
+923822105035|RAJPRASATH K|U
+923822105040|RONEY JOSHUA WESLEY J|U U
+923822105041|ROONY JOEL KINGSLEY J|B U U
+923822105043|SAKTHIVEL C|UA U UA U UA U
+923822105044|SANJANA M|UA UA UA UA UA UA
+923822105046|SELVA S|B U
+923822105048|SIVANESH S|B
+923822105051|SURYA G|UA UA UA UA UA UA
+923822105052|SURYA S|U
+923822105058|YOGESHWAR G K|U UA U U U
+923822105059|YUVARAJ M|U U UA U U U
+923822105301|MOHAMMED AL AZEEZ A|UA UA UA UA UA UA
+923823105004|AKSHAYA S|B+ U U U U
+923823105006|ARUL KARUPPANASAMY M|U U U U U U
+923823105008|AVINASH|UA UA UA UA UA UA
+923823105009|BHARATHKUMAR V|U U UA U U U
+923823105012|DHANALAKSHMI S|U
+923823105013|DINESH KUMAR N|UA U U UA UA UA
+923823105016|EZHIL MARAN P|B+ U U
+923823105020|ISWARYA R|B+
+923823105022|JAI AKASH K|U B+
+923823105027|MANJUSREE A|B B+
+923823105030|MOHAN M|UA UA UA UA UA UA
+923823105031|MUNEESHWARI M|B+
+923823105032|MURUGADAS V|UA UA UA UA UA
+923823105033|NAGAVALLI D|B B+
+923823105034|NARENDRAN C|B+
+923823105035|NITHISH KUMAR M|UA UA UA UA UA UA
+923823105036|NITHIYASREE S|B+ B B+ U
+923823105041|PRAVEEN KARTHIK G|B+ U
+923823105043|PRIYADHARSHINI V|B+
+923823105045|RAMKUMAR B|U
+923823105048|SARAVANAPERUMAL M|UA U UA UA UA UA
+923823105051|SRIYASHINI N|B+ B+
+923823105052|SUBAASH P M|UA U UA U
+923823105054|SUDHIN S|B+ U UA UA`,
+4:`923820105025|PANDILAKSHMI G|U
+923820105044|VISHWA S|UA
+923821105002|ABDHULRAHUMAN R|UA UA
+923821105012|GOPINATH P|
+923821105024|MADHESHWARAN P|
+923821105057|VISHVA T|UA UA
+923822105001|AARTHI B|U U
+923822105002|AKASHRAJ M|B+ U
+923822105004|ARUN PANDI A|U U U UA U
+923822105005|BALAPRASANNA S|UA UA UA UA UA UA
+923822105008|BOOMIKA R|B+ U
+923822105010|DEEPA SRI R|B+
+923822105013|DIVYA P|UA UA UA UA UA UA
+923822105014|GOKILA K|U U
+923822105016|HARINI PRIYA M|U
+923822105019|KADHIJA S|B UA UA B+
+923822105029|NAVEENSAMY B|UA
+923822105032|POOJA K|U UA B
+923822105033|RAJA SOORIYA S|B U B
+923822105035|RAJPRASATH K|B+
+923822105040|RONEY JOSHUA WESLEY J|U
+923822105041|ROONY JOEL KINGSLEY J|B+ U U
+923822105043|SAKTHIVEL C|UA U U UA UA U
+923822105044|SANJANA M|UA UA UA UA UA UA
+923822105046|SELVA S|U U UA U U
+923822105051|SURYA G|UA U UA UA UA
+923822105058|YOGESHWAR G K|U U U U
+923822105059|YUVARAJ M|U UA UA U UA U
+923822105301|MOHAMMED AL AZEEZ A|UA UA U UA UA
+923823105003|AJAY P|B+
+923823105004|AKSHAYA S|B+ U UA UA UA
+923823105006|ARUL KARUPPANASAMY M|U U U U
+923823105008|AVINASH|U UA U UA UA U
+923823105009|BHARATHKUMAR V|UA U UA UA U
+923823105012|DHANALAKSHMI S|B+
+923823105013|DINESH KUMAR N|UA UA UA UA UA U
+923823105016|EZHIL MARAN P|U UA U
+923823105020|ISWARYA R|U UA B+
+923823105027|MANJUSREE A|B+ UA
+923823105029|MOHAMMED RENU SHAKITH S|U
+923823105030|MOHAN M|UA UA UA UA UA UA
+923823105031|MUNEESHWARI M|B+ U U
+923823105032|MURUGADAS V|UA U UA UA UA UA
+923823105033|NAGAVALLI D|B+ B+
+923823105034|NARENDRAN C|U
+923823105035|NITHISH KUMAR M|UA U UA UA UA U
+923823105036|NITHIYASREE S|B+ B B B+
+923823105043|PRIYADHARSHINI V|U B+
+923823105048|SARAVANAPERUMAL M|UA UA UA UA U U
+923823105051|SRIYASHINI N|B+ U
+923823105052|SUBAASH P M|B U U U U
+923823105054|SUDHIN S|UA UA UA UA UA UA
+923823105057|VARSHINI J|U`,
+5:`923820105020|MURALI KARTHICK M|U
+923820105044|VISHWA S|UA
+923821105002|ABDHULRAHUMAN R|UA UA UA UA
+923821105003|ABDUL KHADHIR JEELANI B|B+
+923821105012|GOPINATH P|
+923821105021|KARTHIKEYAN R|B+ B
+923821105024|MADHESHWARAN P|
+923821105026|MARI SELVAN K|B+
+923821105039|PRIYANKA S|UA
+923821105057|VISHVA T|UA UA UA UA UA
+923821105301|GUNASEELAN S|U
+923822105001|AARTHI B|U U
+923822105002|AKASHRAJ M|U
+923822105004|ARUN PANDI A|UA UA
+923822105005|BALAPRASANNA S|UA UA UA UA UA UA
+923822105010|DEEPA SRI R|B
+923822105013|DIVYA P|UA UA UA UA
+923822105014|GOKILA K|U
+923822105016|HARINI PRIYA M|UA
+923822105019|KADHIJA S|UA UA UA
+923822105029|NAVEENSAMY B|UA UA UA
+923822105032|POOJA K|UA
+923822105033|RAJA SOORIYA S|UA U UA
+923822105035|RAJPRASATH K|B
+923822105038|RENUGA DEVI S|B
+923822105040|RONEY JOSHUA WESLEY J|UA U
+923822105041|ROONY JOEL KINGSLEY J|UA U
+923822105043|SAKTHIVEL C|UA UA UA UA
+923822105044|SANJANA M|UA UA UA UA
+923822105046|SELVA S|UA UA
+923822105051|SURYA G|UA UA UA UA
+923822105058|YOGESHWAR G K|U UA U U
+923822105059|YUVARAJ M|U UA U U
+923822105301|MOHAMMED AL AZEEZ A|UA UA UA
+923823105003|AJAY P|B+
+923823105004|AKSHAYA S|B+ B+ UA UA A UA UA
+923823105006|ARUL KARUPPANASAMY M|U U
+923823105008|AVINASH|U B B+ U UA UA
+923823105009|BHARATHKUMAR V|U B+ U UA UA
+923823105013|DINESH KUMAR N|UA UA UA UA
+923823105016|EZHIL MARAN P|U
+923823105020|ISWARYA R|U UA U
+923823105022|JAI AKASH K|B+ B+
+923823105030|MOHAN M|UA UA UA UA UA
+923823105032|MURUGADAS V|U
+923823105033|NAGAVALLI D|B+ U
+923823105035|NITHISH KUMAR M|UA U UA UA
+923823105041|PRAVEEN KARTHIK G|B U
+923823105048|SARAVANAPERUMAL M|UA U UA UA
+923823105051|SRIYASHINI N|U
+923823105052|SUBAASH P M|UA U UA
+923823105054|SUDHIN S|UA UA UA UA`,
+6:`923819105037|PRAKASHPANDI D|U U B
+923820105023|NAGALAKSHMI M|UA
+923820105044|VISHWA S|UA U
+923821105002|ABDHULRAHUMAN R|U
+923821105012|GOPINATH P|
+923821105024|MADHESHWARAN P|
+923821105057|VISHVA T|UA UA
+923822105002|AKASHRAJ M|B+
+923822105004|ARUN PANDI A|UA
+923822105005|BALAPRASANNA S|UA UA UA UA UA UA
+923822105013|DIVYA P|UA UA
+923822105014|GOKILA K|B+ U
+923822105016|HARINI PRIYA M|B+
+923822105019|KADHIJA S|U U
+923822105029|NAVEENSAMY B|UA
+923822105032|POOJA K|U UA
+923822105033|RAJA SOORIYA S|B+
+923822105038|RENUGA DEVI S|B+
+923822105043|SAKTHIVEL C|UA U
+923822105044|SANJANA M|UA UA
+923822105051|SURYA G|UA UA
+923822105053|THULASI MEENA S|B+
+923822105058|YOGESHWAR G K|UA U
+923822105059|YUVARAJ M|U UA
+923822105301|MOHAMMED AL AZEEZ A|UA UA
+923822105501|PRAKASHPANDI D|UA UA UA
+923823105001|AASHIKA C|A A B+ B+ O A+ O A
+923823105002|AGALYA S|A+ A+ B+ B+ O O O A
+923823105003|AJAY P|A A B+ B+ O O O A
+923823105004|AKSHAYA S|A A B B+ U O O O A
+923823105006|ARUL KARUPPANASAMY M|B+ B+ U U A+ A+ O B+
+923823105008|AVINASH|U U B+ U U A+ A+ O B+
+923823105009|BHARATHKUMAR V|U B B U U A+ A+ A+ B+
+923823105010|DEEPIKA K|A A A B+ O A+ O A
+923823105011|DHAARANI S|A+ A A B+ O O O A
+923823105012|DHANALAKSHMI S|A A A B+ O O O A
+923823105013|DINESH KUMAR N|B B U U U A+ A+ O B+
+923823105016|EZHIL MARAN P|B+ B+ B U O A+ O B+
+923823105017|GENGAMANI D|A A A A O O O A
+923823105018|HARISHMA S|A A B+ A O O O A
+923823105019|HEMA VARSHINI M|A A+ A A O O O A
+923823105020|ISWARYA R|B+ B+ B B+ A+ A+ O UA
+923823105021|JAGADEESWARAN G|B+ A B+ B+ O O O A
+923823105022|JAI AKASH K|B+ B+ B+ B+ A+ A+ A+ B+
+923823105023|JOYS PAPPU J|A A A B+ O O O A
+923823105027|MANJUSREE A|B+ A A B+ O O O A
+923823105029|MOHAMMED RENU SHAKITH S|B+ B+ B+ U A+ O O B+
+923823105030|MOHAN M|U B U U A+ A+ A+ B+
+923823105031|MUNEESHWARI M|B+ A B+ U O A+ O A
+923823105032|MURUGADAS V|B+ B+ U UA A+ A+ O B+
+923823105033|NAGAVALLI D|B+ B+ B+ B+ A+ A+ O A
+923823105034|NARENDRAN C|B+ A U B+ A+ A+ O A
+923823105035|NITHISH KUMAR M|B B+ U U O A+ O B+
+923823105036|NITHIYASREE S|B+ A B+ B+ O A+ O A
+923823105039|POTHYS G|B+ A B+ U O A+ O A
+923823105040|PRAVEENA P|A A A A O A+ O A
+923823105041|PRAVEEN KARTHIK G|B+ B+ B+ B+ O A+ O A
+923823105042|PRIYADHARSHINI M|A A B+ B+ O A+ O A
+923823105043|PRIYADHARSHINI V|A A B+ U O A+ O A
+923823105045|RAMKUMAR B|A A B+ B+ O A+ O A
+923823105046|RAMYA M|A A B+ B+ O O O A
+923823105047|RENGANAYAKI P T|A A B+ B+ O A+ O A
+923823105048|SARAVANAPERUMAL M|B U U U A+ A+ O B+
+923823105049|SHALINI DEVI R|A A+ A B+ O O O A
+923823105051|SRIYASHINI N|A A B+ B+ O O O A
+923823105052|SUBAASH P M|B A U B+ A+ A+ O A
+923823105053|SUBASHREE V|A A+ B+ B+ O O O A
+923823105054|SUDHIN S|B B+ U U A+ A+ O B+
+923823105057|VARSHINI J|A B+ B+ B+ O O O A
+923823105058|VIGNESHWARAN M|B+ B+ U B+ A+ A+ O B+
+923823105059|VISHNUKUMAR K R|B+ B+ B+ U O O O A`,
+7:`923819105037|PRAKASHPANDI D|B B
+923820105023|NAGALAKSHMI M|UA B
+923820105025|PANDILAKSHMI G|B
+923820105044|VISHWA S|U UA UA
+923821105024|MADHESHWARAN P|
+923821105057|VISHVA T|UA UA
+923821105301|GUNASEELAN S|B
+923822105001|AARTHI B|B+ B+
+923822105002|AKASHRAJ M|U B+ B+
+923822105004|ARUN PANDI A|U U U
+923822105005|BALAPRASANNA S|UA UA UA UA UA UA
+923822105006|BHARATH K|B+
+923822105013|DIVYA P|UA UA UA UA
+923822105016|HARINI PRIYA M|B+
+923822105019|KADHIJA S|U UA
+923822105029|NAVEENSAMY B|UA UA UA UA
+923822105032|POOJA K|UA
+923822105033|RAJA SOORIYA S|U B U
+923822105035|RAJPRASATH K|B+ A
+923822105038|RENUGA DEVI S|A+
+923822105040|RONEY JOSHUA WESLEY J|U
+923822105041|ROONY JOEL KINGSLEY J|B+
+923822105042|SAKTHI DEVI P|B+
+923822105043|SAKTHIVEL C|UA UA UA U UA
+923822105044|SANJANA M|UA UA UA UA
+923822105046|SELVA S|U U
+923822105048|SIVANESH S|B+
+923822105051|SURYA G|UA UA UA U UA
+923822105058|YOGESHWAR G K|U B B+ B
+923822105059|YUVARAJ M|U UA B+ U U
+923822105301|MOHAMMED AL AZEEZ A|UA UA UA UA U
+923822105501|PRAKASHPANDI D|UA UA`,
+8:`923820105004|BALAMURUGAN N|B+
+923820105025|PANDILAKSHMI G|U
+923822105001|AARTHI B|O
+923822105002|AKASHRAJ M|O
+923822105003|AMRITA VARSHINI M|O
+923822105004|ARUN PANDI A|O
+923822105005|BALAPRASANNA S|A+
+923822105006|BHARATH K|O
+923822105007|BHAVANI S|O
+923822105008|BOOMIKA R|O
+923822105010|DEEPA SRI R|O
+923822105011|DEEPIKA G|O
+923822105012|DHANUSHYA M|O
+923822105013|DIVYA P|A+
+923822105014|GOKILA K|O
+923822105015|GOPIKA R|O
+923822105016|HARINI PRIYA M|O
+923822105019|KADHIJA S|O
+923822105020|KAVYA P|O
+923822105022|LAVANYA K|O
+923822105023|LAYSAL SAMEER N|O
+923822105024|MANIKANDAN A|O
+923822105025|MANIKANDAN S|O
+923822105027|NATHIYA S|O
+923822105029|NAVEENSAMY B|O
+923822105030|NISHANTHINI V|O
+923822105031|PANDISELVI P|O
+923822105032|POOJA K|O
+923822105033|RAJA SOORIYA S|O
+923822105034|RAJESHKUMAR M|O
+923822105035|RAJPRASATH K|O
+923822105036|RAMYA M|O
+923822105037|RANJITH KUMAR S|O
+923822105038|RENUGA DEVI S|O
+923822105039|RESHMITHA P|O
+923822105040|RONEY JOSHUA WESLEY J|O
+923822105041|ROONY JOEL KINGSLEY J|O
+923822105042|SAKTHI DEVI P|O
+923822105043|SAKTHIVEL C|O
+923822105044|SANJANA M|A+
+923822105045|SANTHIYA V|O
+923822105046|SELVA S|A+
+923822105047|SISMITHA T|O
+923822105048|SIVANESH S|O
+923822105049|SOWMIYA D|O
+923822105051|SURYA G|A+
+923822105052|SURYA S|O
+923822105053|THULASI MEENA S|O
+923822105056|VINOTHA S|O
+923822105057|YOGAPRIYADHARSHINI J|O
+923822105058|YOGESHWAR G K|O
+923822105059|YUVARAJ M|A+
+923822105301|MOHAMMED AL AZEEZ A|O
+923822105501|PRAKASHPANDI D|A+`
+};
+
+const PASS = new Set(['O','A+','A','B+','B','C']);
+const ORDER = ['O','A+','A','B+','B','U','UA'];
+const kind = g => PASS.has(g) ? 'ok' : g;
+
+// ---- parse ----
+const students = {};
+for (const s in RAW) {
+  RAW[s].split('\n').forEach(line => {
+    const [reg, name, g] = line.split('|');
+    const st = students[reg] || (students[reg] = {reg, name, batch: '20' + reg.slice(4,6), sems: {}});
+    st.sems[s] = g.trim() ? g.trim().split(/\s+/) : [];
+  });
+}
+const all = Object.values(students).sort((a,b)=>a.reg.localeCompare(b.reg));
+const batches = [...new Set(all.map(s=>s.batch))].sort();
+
+// ---- state ----
+const state = {batch:'all', sem:'all', q:'', status:'all'};
+const $ = id => document.getElementById(id);
+
+function gradesOf(st, sem){
+  if (sem === 'all') return Object.values(st.sems).flat();
+  return st.sems[sem] || [];
+}
+function tally(list){
+  const t = {n:0, pass:0, U:0, UA:0, by:{}};
+  list.forEach(g=>{ t.n++; t.by[g]=(t.by[g]||0)+1; if(PASS.has(g)) t.pass++; else if(g==='UA') t.UA++; else t.U++; });
+  return t;
+}
+const pct = (a,b)=> b ? Math.round(a*1000/b)/10 : 0;
+
+function scoped(includeQuery){
+  return all.filter(s=>{
+    if (state.batch!=='all' && s.batch!==state.batch) return false;
+    if (state.sem!=='all' && !(state.sem in s.sems)) return false;
+    if (includeQuery && state.q){
+      const q = state.q.toLowerCase();
+      if (!s.name.toLowerCase().includes(q) && !s.reg.includes(q)) return false;
+    }
+    if (includeQuery && state.status!=='all'){
+      const t = tally(gradesOf(s, state.sem));
+      const failed = t.U + t.UA > 0;
+      if (state.status==='arrear' && !failed) return false;
+      if (state.status==='clear' && (failed || t.n===0)) return false;
+    }
+    return true;
+  });
+}
+
+function bar(label, parts, right){
+  const tot = parts.reduce((a,p)=>a+p.v,0) || 1;
+  return `<div class="bar-row"><span>${label}</span><div class="track">${
+    parts.map(p=>`<i class="${p.c}" style="width:${p.v*100/tot}%" title="${p.t||''}"></i>`).join('')
+  }</div><em>${right}</em></div>`;
+}
+
+function render(){
+  // tabs
+  const counts = {all: all.length};
+  batches.forEach(b=>counts[b]=all.filter(s=>s.batch===b).length);
+  $('tabs').innerHTML = ['all',...batches].map(b=>
+    `<button class="tab" data-b="${b}" aria-pressed="${state.batch===b}">${b==='all'?'All batches':b+' batch'}<small>${counts[b]}</small></button>`
+  ).join('');
+
+  const scope = scoped(true);
+  const scopeNoQ = scoped(false);
+  const grades = scope.flatMap(s=>gradesOf(s,state.sem));
+  const t = tally(grades);
+  const cleared = scope.filter(s=>{const x=tally(gradesOf(s,state.sem));return x.n>0 && x.U+x.UA===0}).length;
+
+  $('kpis').innerHTML = `
+    <div class="kpi"><b>${scope.length}</b><span>Students listed</span></div>
+    <div class="kpi"><b>${t.n}</b><span>Grades published</span></div>
+    <div class="kpi p"><b>${t.pass}</b><span>Passed (${pct(t.pass,t.n)}%)</span></div>
+    <div class="kpi u"><b>${t.U}</b><span>U, failed</span></div>
+    <div class="kpi a"><b>${t.UA}</b><span>UA, absent</span></div>
+    <div class="kpi"><b>${cleared}</b><span>Students with no U / UA</span></div>`;
+
+  // grade distribution
+  const mx = Math.max(1, ...ORDER.map(g=>t.by[g]||0));
+  $('gradeBars').innerHTML = ORDER.map(g=>{
+    const v = t.by[g]||0;
+    const c = g==='U'?'f-u':g==='UA'?'f-ua':'f-pass';
+    return `<div class="bar-row"><span>${g}</span><div class="track"><i class="${c}" style="width:${v*100/mx}%"></i></div><em>${v}</em></div>`;
+  }).join('');
+
+  // semester bars (batch + search + status filters, all semesters)
+  let html='';
+  for(let s=1;s<=8;s++){
+    const list = all.filter(x=>(state.batch==='all'||x.batch===state.batch) && (s in x.sems)).flatMap(x=>x.sems[s]);
+    const tt = tally(list);
+    html += bar('Sem '+s,[{v:tt.pass,c:'f-pass',t:'Pass'},{v:tt.U,c:'f-u',t:'U'},{v:tt.UA,c:'f-ua',t:'UA'}], tt.n?pct(tt.pass,tt.n)+'%':'–');
+  }
+  $('semBars').innerHTML = html;
+
+  // batch comparison
+  $('batchBars').innerHTML = batches.map(b=>{
+    const list = all.filter(x=>x.batch===b);
+    const tt = tally(list.flatMap(x=>gradesOf(x, state.sem)));
+    const sc = list.filter(x=>state.sem==='all'||state.sem in x.sems).length;
+    return `<button class="batchbtn" data-b="${b}" aria-label="Filter to ${b} batch">${
+      bar(b,[{v:tt.pass,c:'f-pass'},{v:tt.U,c:'f-u'},{v:tt.UA,c:'f-ua'}], pct(tt.pass,tt.n)+'%')
+    }<div class="legend" style="margin:0 0 6px 56px"><span>${sc} students</span><span>${tt.n} grades</span><span>${tt.U} U</span><span>${tt.UA} UA</span></div></button>`;
+  }).join('');
+
+  // table
+  const semCols = state.sem==='all' ? [1,2,3,4,5,6,7,8] : [+state.sem];
+  const chip = g => `<span class="c ${kind(g)}">${g}</span>`;
+  const head = `<thead><tr><th>Register no.</th><th>Name</th><th>Batch</th>${semCols.map(s=>`<th>Sem ${s}</th>`).join('')}<th>Pass / Fail</th></tr></thead>`;
+  const rows = scope.map(s=>{
+    const tt = tally(gradesOf(s,state.sem));
+    const cells = semCols.map(c=>{
+      const g = s.sems[c];
+      if (!g) return `<td class="dash">–</td>`;
+      if (!g.length) return `<td><span class="dash" title="Row listed, no grade printed">no grade</span></td>`;
+      return `<td><div class="chips">${g.map(chip).join('')}</div></td>`;
+    }).join('');
+    return `<tr><td class="reg">${s.reg}</td><td class="nm">${s.name}</td><td>${s.batch}</td>${cells}<td><div class="summary"><span class="c ok">${tt.pass}</span><span class="c U">${tt.U+tt.UA}</span></div></td></tr>`;
+  }).join('');
+  $('tbl').innerHTML = scope.length ? head+`<tbody>${rows}</tbody>` : `<tbody><tr><td class="empty">No students match these filters. Clear the search or pick another batch.</td></tr></tbody>`;
+  $('count').textContent = `${scope.length} student${scope.length===1?'':'s'} shown`;
+}
+
+// ---- events ----
+$('sem').innerHTML = '<option value="all">All semesters</option>' + [1,2,3,4,5,6,7,8].map(s=>`<option value="${s}">Semester ${s}</option>`).join('');
+$('sem').onchange = e => {state.sem=e.target.value; render();};
+$('status').onchange = e => {state.status=e.target.value; render();};
+$('q').oninput = e => {state.q=e.target.value.trim(); render();};
+document.addEventListener('click', e=>{
+  const b = e.target.closest('[data-b]');
+  if (b){ state.batch = (state.batch===b.dataset.b && b.classList.contains('batchbtn')) ? 'all' : b.dataset.b; render(); }
+});
+$('theme').onclick = () => {
+  const r = document.documentElement;
+  const dark = r.dataset.theme==='dark' || (!r.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+  r.dataset.theme = dark ? 'light' : 'dark';
+};
+render();
+</script>
+</body>
+</html>
